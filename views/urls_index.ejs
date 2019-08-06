@@ -35,9 +35,13 @@
             <td><%= url %></td>
             <td><%= urls[url] %></td>
             <td>
+                <form
+                method="GET"
+                action="/urls/<%=url %>">
               <button type="submit" class="btn btn-outline-primary">
                 Edit
               </button>
+            </form>
             </td>
             <td>
               <form
