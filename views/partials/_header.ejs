@@ -10,8 +10,15 @@
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </ul>
       <ul class="navbar-nav" id="navbarNavAltMarkup">
+          <% if (users) { %>
+            <a class="navbar navbar-light"><strong><%="Logged In As: " + users.email%></strong></a>
+            <form action="/logout" method="POST" style="padding:10px;">
+              <button type="submit" class="btn btn-primary">Logout</button>
+            </form>
+            <%} else { %>
       <a class="nav-item nav-link" href="/login">Login</a>
       <a class="nav-item nav-link" href="/register">Register</a>
+      <%}%>
     </ul>
     </div>
   </nav>
