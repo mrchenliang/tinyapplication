@@ -16,9 +16,22 @@ const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 
 const urlDatabase = {
-  b2xVn2: "http://www.lighthouselabs.ca",
+  "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
+
+const users = { 
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
+}
 
 // parsing the information coming from the client
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -80,16 +93,21 @@ app.post("/urls/:id/delete", (req, res) => {
   res.redirect("/urls");
 });
 
-// Displaying login name in the header
-app.post("/login", (req, res) => {
-  res.cookie("username", req.body.username);
-  res.redirect("/urls");
+// Registering for new accounts
+app.get("/register", (req, res) => {
+  res.render("register", { username: req.cookies["username"] })
 });
 
-// Displaying logging out name in the header
-app.post("/logout", (req, res) => {
-  res.clearCookie("username", req.body.username);
-  res.redirect("/urls");
+// logging in and out
+app.get("/login", (req, res) => {
+  res.render("login", { username: req.cookies["username"] })
+});
+
+app.post("/register", (req, res) => {
+  userID = random();
+  let users = {id: userID, email: req.body.email, password: req.body.password};
+  res.cookie('user_id', userID);
+  res.redirect("/urls")
 });
 
 app.listen(PORT, () => {
