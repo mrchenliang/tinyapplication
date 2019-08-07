@@ -3,6 +3,7 @@ const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
+const bcrypt = require('bcrypt');
 
 const urlDatabase = {
   sgq3y6: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
@@ -15,19 +16,20 @@ const users = {
   userRandomID: {
     id: "userRandomID",
     email: "user@example.com",
-    password: "purple-monkey-dinosaur"
+    password: bcrypt.hashSync("purple-monkey-dinosaur", 10)
   },
   user2RandomID: {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: "dishwasher-funk"
+    password: bcrypt.hashSync("dishwasher-funk", 10)
   },
   test12: {
     id: "test12",
     email: "c@c.com",
-    password: "a"
+    password: bcrypt.hashSync("a", 10)
   }
 };
+
 
 function random() {
   var result = "";
@@ -37,7 +39,7 @@ function random() {
     result += characters.charAt(Math.floor(Math.random() * characters.length));
   }
   return result;
-}
+};
 
 // checking for existing email
 function existingEmail(email) {
@@ -47,18 +49,8 @@ function existingEmail(email) {
     }
   }
   return false;
-}
+};
 
-// checking for matching password
-function findPassword(email, password) {
-  for (let item in users) {
-    user = users[item];
-    if (email === user.email && password === user.password) {
-      return true;
-    }
-  }
-  return false;
-}
 // filtering URLs based on userID
 function urlsForUser(id) {
   let shortURL = {};
@@ -68,7 +60,7 @@ function urlsForUser(id) {
     }
   }
   return shortURL;
-}
+};
 
 // parsing the information coming from the client
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -143,7 +135,7 @@ app.get("/u/:shortURL", (req, res) => {
 app.post("/urls/:id/delete", (req, res) => {
   if (
     users[req.cookies.user_id] &&
-    urlDatabase[id].userID === req.cookies.user_id
+    urlDatabase[req.params.id].userID === req.cookies.user_id
   ) {
     delete urlDatabase[req.params.id];
     res.redirect("/urls");
@@ -165,10 +157,11 @@ app.get("/login", (req, res) => {
 // registering as a new user
 app.post("/register", (req, res) => {
   const userID = random();
+  const hashedPassword = bcrypt.hashSync(req.body.password, 10)
   let userVars = {
     id: userID,
     email: req.body.email,
-    password: req.body.password
+    password: hashedPassword,
   };
   //if no email or password provided render 400 status
   if (!userVars.email || !userVars.password) {
@@ -199,11 +192,16 @@ app.post("/login", (req, res) => {
   if (!existingEmail(req.body.email)) {
     res.status(403).send("Email address cannot be found");
     //if email provided is existing render 400 status
-  } else if (!findPassword(req.body.email, req.body.password)) {
+  } else { 
+    for (let item in users) {
+      user = users[item];
+      if (req.body.email === user.email && bcrypt.compareSync(req.body.password, user.password)) {
+        res.cookie("user_id", user.id);
+        res.redirect("/urls");
+        return;
+      }
+    }
     res.status(403).send("You have entered the incorrect password");
-  } else {
-    res.cookie("user_id", user.id);
-    res.redirect("/urls");
   }
 });
 
