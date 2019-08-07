@@ -138,10 +138,31 @@ app.post("/logout", (req, res) => {
   res.redirect('/urls');
 });
 
+function findPassword(email, password) {
+  for (let item in users) {
+    user = users[item];
+    if (email === user.email && password === user.password) {
+      return true;
+    }
+    return false;
+}
+};
+
 // logging in an user
 app.post("/login", (req, res) => {
-  res.render('login');
-});
+  let email = req.body.email;
+  let password = req.body.password;
+  //if no email found in the database render 403 status
+  if (!existingEmail(req.body.email)) {
+    res.status(403).send("Email address cannot be found");
+    //if email provided is existing render 400 status
+  } else if (!findPassword(req.body.email, req.body.password)) {
+    res.status(403).send("You have entered the incorrect password");
+  } else {
+    res.cookie("user_id", user.id);
+    res.redirect("/urls");
+};
+})
 
 app.listen(PORT, () => {
   console.log(`Listening on port ${PORT}!`);
