@@ -32,12 +32,12 @@ app.get("/", (req, res) => {
 
 // page for new URLs
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  res.render("urls_new", { username: req.cookies["username"] });
 });
 
 // page for the URL list
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase };
+  let templateVars = { urls: urlDatabase, username: req.cookies["username"] };
   res.render("urls_index", templateVars);
 });
 
@@ -51,8 +51,9 @@ app.post("/urls", (req, res) => {
 // the individual shortened URL pages
 app.get("/urls/:id", (req, res) => {
   let templateVars = {
+    username: req.cookies["username"],
     shortURL: req.params.id,
-    longURL: urlDatabase[req.params.id]
+    longURL: urlDatabase[req.params.id],
   };
   if (urlDatabase[req.params.id]) {
     res.render("urls_show", templateVars);
@@ -79,9 +80,15 @@ app.post("/urls/:id/delete", (req, res) => {
   res.redirect("/urls");
 });
 
-// deleting old URLs
+// Displaying login name in the header
 app.post("/login", (req, res) => {
   res.cookie("username", req.body.username);
+  res.redirect("/urls");
+});
+
+// Displaying logging out name in the header
+app.post("/logout", (req, res) => {
+  res.clearCookie("username", req.body.username);
   res.redirect("/urls");
 });
 
