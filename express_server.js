@@ -1,12 +1,3 @@
-function random() {
-  var result = "";
-  var characters =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  for (var i = 0; i < 6; i++) {
-    result += characters.charAt(Math.floor(Math.random() * characters.length));
-  }
-  return result;
-}
 
 const express = require("express");
 const app = express();
@@ -15,8 +6,10 @@ const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  sgq3y6: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
+  i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" },
+  asfdx8: { longURL: "https://www.google.ca", userID: "test12" },
+  csdsf2: { longURL: "https://www.youtube.ca", userID: "test12" },
 };
 
 const users = {
@@ -29,8 +22,54 @@ const users = {
     id: "user2RandomID",
     email: "user2@example.com",
     password: "dishwasher-funk"
+  },
+  test12: {
+    id: "test12",
+    email: "c@c.com",
+    password: "a"
   }
 };
+
+function random() {
+  var result = "";
+  var characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  for (var i = 0; i < 6; i++) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return result;
+};
+
+// checking for existing email
+function existingEmail(email) {
+  for (let user in users) {
+    if (email === users[user].email) {
+      return true;
+    }
+  }
+  return false;
+};
+
+// checking for matching password
+function findPassword(email, password) {
+  for (let item in users) {
+    user = users[item];
+    if (email === user.email && password === user.password) {
+      return true;
+    }
+  }
+  return false;
+};
+// filtering URLs based on userID
+function urlsForUser(id) {
+  let shortURL ={};
+  for (let key in urlDatabase) {
+    if(id === urlDatabase[key].userID){
+      shortURL[key] = {longURL: urlDatabase[key].longURL, userID: id};
+    }
+  }
+  return shortURL;
+}
 
 // parsing the information coming from the client
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -44,19 +83,31 @@ app.get("/", (req, res) => {
 
 // page for new URLs
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new", {users: users[req.cookies["user_id"]]});
+  for (let user in users) {
+    if (users[req.cookies["user_id"]] === users[user]) {
+      let templateVars = {
+        users: users[req.cookies["user_id"]]
+      };     
+      res.render("urls_new", templateVars);
+      return;
+    }
+  }
+  res.redirect("/login");
 });
 
 // page for the URL list
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase, users: users[req.cookies["user_id"]] };
+  let templateVars = {
+    urls: urlsForUser(req.cookies.user_id),
+    users: users[req.cookies["user_id"]]
+  };
   res.render("urls_index", templateVars);
 });
 
 // page for URLs updating and posting
 app.post("/urls", (req, res) => {
   const string = random();
-  urlDatabase[string] = req.body.longURL;
+  urlDatabase[string] = {longURL: req.body.longURL, userID: req.cookies.user_id}
   res.redirect("http://localhost:8080/urls/" + String(string));
 });
 
@@ -65,9 +116,9 @@ app.get("/urls/:id", (req, res) => {
   let templateVars = {
     users: users[req.cookies["user_id"]],
     shortURL: req.params.id,
-    longURL: urlDatabase[req.params.id]
+    longURL: urlDatabase[req.params.id].longURL
   };
-  if (urlDatabase[req.params.id]) {
+  if (urlDatabase[req.params.id].longURL) {
     res.render("urls_show", templateVars);
   } else {
     res.render("urls_new");
@@ -76,13 +127,13 @@ app.get("/urls/:id", (req, res) => {
 
 // editting and changing shortened URL pages
 app.post("/urls/:id", (req, res) => {
-  urlDatabase[req.params.id] = req.body.longURL;
+  urlDatabase[req.params.id].longURL = req.body.longURL;
   res.redirect(`/urls`);
 });
 
 // redirecting to new pages
 app.get("/u/:shortURL", (req, res) => {
-  let longURL = urlDatabase[req.params.shortURL];
+  let longURL = urlDatabase[req.params.shortURL].longURL;
   res.redirect(longURL);
 });
 
@@ -94,23 +145,14 @@ app.post("/urls/:id/delete", (req, res) => {
 
 // Registering for new accounts
 app.get("/register", (req, res) => {
-  res.render("register",{users: users[req.cookies["user_id"]]});
+  res.render("register", { users: users[req.cookies["user_id"]] });
 });
 
 // logging in and out
 app.get("/login", (req, res) => {
-  res.render('login', {users: users[req.cookies["user_id"]]});
+  res.render("login", { users: users[req.cookies["user_id"]] });
 });
 
-// checking for existing email
-function existingEmail(email) {
-  for (let user in users) {
-    if (email === users[user].email) {
-      return true;
-    }
-    return false;
-  }
-}
 // registering as a new user
 app.post("/register", (req, res) => {
   const userID = random();
@@ -124,7 +166,9 @@ app.post("/register", (req, res) => {
     res.status(400).send("Email and password fields are empty");
     //if email provided is existing render 400 status
   } else if (existingEmail(req.body.email)) {
-    res.status(400).send("Existing user, please register with a different email");
+    res
+      .status(400)
+      .send("Existing user, please register with a different email");
   } else {
     users[userID] = userVars;
     res.cookie("user_id", userID);
@@ -134,19 +178,9 @@ app.post("/register", (req, res) => {
 
 // logging an user out
 app.post("/logout", (req, res) => {
-  res.clearCookie('user_id');
-  res.redirect('/urls');
+  res.clearCookie("user_id");
+  res.redirect("/urls");
 });
-
-function findPassword(email, password) {
-  for (let item in users) {
-    user = users[item];
-    if (email === user.email && password === user.password) {
-      return true;
-    }
-    return false;
-}
-};
 
 // logging in an user
 app.post("/login", (req, res) => {
@@ -161,9 +195,9 @@ app.post("/login", (req, res) => {
   } else {
     res.cookie("user_id", user.id);
     res.redirect("/urls");
-};
-})
+  }
+});
 
 app.listen(PORT, () => {
-  console.log(`Listening on port ${PORT}!`);
+  console.log(`TinyApp Listening on port ${PORT}!`);
 });
