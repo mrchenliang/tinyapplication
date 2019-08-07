@@ -1,4 +1,3 @@
-
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
@@ -9,7 +8,7 @@ const urlDatabase = {
   sgq3y6: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
   i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" },
   asfdx8: { longURL: "https://www.google.ca", userID: "test12" },
-  csdsf2: { longURL: "https://www.youtube.ca", userID: "test12" },
+  csdsf2: { longURL: "https://www.youtube.ca", userID: "test12" }
 };
 
 const users = {
@@ -38,7 +37,7 @@ function random() {
     result += characters.charAt(Math.floor(Math.random() * characters.length));
   }
   return result;
-};
+}
 
 // checking for existing email
 function existingEmail(email) {
@@ -48,7 +47,7 @@ function existingEmail(email) {
     }
   }
   return false;
-};
+}
 
 // checking for matching password
 function findPassword(email, password) {
@@ -59,13 +58,13 @@ function findPassword(email, password) {
     }
   }
   return false;
-};
+}
 // filtering URLs based on userID
 function urlsForUser(id) {
-  let shortURL ={};
+  let shortURL = {};
   for (let key in urlDatabase) {
-    if(id === urlDatabase[key].userID){
-      shortURL[key] = {longURL: urlDatabase[key].longURL, userID: id};
+    if (id === urlDatabase[key].userID) {
+      shortURL[key] = { longURL: urlDatabase[key].longURL, userID: id };
     }
   }
   return shortURL;
@@ -87,7 +86,7 @@ app.get("/urls/new", (req, res) => {
     if (users[req.cookies["user_id"]] === users[user]) {
       let templateVars = {
         users: users[req.cookies["user_id"]]
-      };     
+      };
       res.render("urls_new", templateVars);
       return;
     }
@@ -107,7 +106,10 @@ app.get("/urls", (req, res) => {
 // page for URLs updating and posting
 app.post("/urls", (req, res) => {
   const string = random();
-  urlDatabase[string] = {longURL: req.body.longURL, userID: req.cookies.user_id}
+  urlDatabase[string] = {
+    longURL: req.body.longURL,
+    userID: req.cookies.user_id
+  };
   res.redirect("http://localhost:8080/urls/" + String(string));
 });
 
@@ -139,8 +141,15 @@ app.get("/u/:shortURL", (req, res) => {
 
 // deleting old URLs
 app.post("/urls/:id/delete", (req, res) => {
-  delete urlDatabase[req.params.id];
-  res.redirect("/urls");
+  if (
+    users[req.cookies.user_id] &&
+    urlDatabase[id].userID === req.cookies.user_id
+  ) {
+    delete urlDatabase[req.params.id];
+    res.redirect("/urls");
+  } else {
+    res.status(400).send("Cannot delete URL link");
+  }
 });
 
 // Registering for new accounts
