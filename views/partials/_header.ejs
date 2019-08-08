@@ -12,7 +12,7 @@
       <ul class="navbar-nav" id="navbarNavAltMarkup">
           <% if (users) { %>
             <a class="navbar navbar-light"><strong><%="Logged In As: " + users.email%></strong></a>
-            <form action="/logout" method="POST" style="padding:10px;">
+            <form action="/logout?_method=DELETE" method="POST" style="padding:10px;">
               <button type="submit" class="btn btn-primary">Logout</button>
             </form>
             <%} else { %>
