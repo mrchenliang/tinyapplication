@@ -2,8 +2,9 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
-const cookieParser = require("cookie-parser");
+const sessionession = require('cookie-session');
 const bcrypt = require('bcrypt');
+const {getUserByEmail, urlsForUser, random} = require("./helpers");
 
 const urlDatabase = {
   sgq3y6: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
@@ -30,42 +31,16 @@ const users = {
   }
 };
 
-
-function random() {
-  var result = "";
-  var characters =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  for (var i = 0; i < 6; i++) {
-    result += characters.charAt(Math.floor(Math.random() * characters.length));
-  }
-  return result;
-};
-
-// checking for existing email
-function existingEmail(email) {
-  for (let user in users) {
-    if (email === users[user].email) {
-      return true;
-    }
-  }
-  return false;
-};
-
-// filtering URLs based on userID
-function urlsForUser(id) {
-  let shortURL = {};
-  for (let key in urlDatabase) {
-    if (id === urlDatabase[key].userID) {
-      shortURL[key] = { longURL: urlDatabase[key].longURL, userID: id };
-    }
-  }
-  return shortURL;
-};
-
 // parsing the information coming from the client
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cookieParser());
 app.set("view engine", "ejs");
+app.use(sessionession({
+  name: 'session',
+  keys: ["ilovelisa"],
+
+  // Cookie Options
+  maxAge: 24 * 60 * 60 * 1000 // 24 hours
+}))
 
 // homepage
 app.get("/", (req, res) => {
@@ -75,9 +50,9 @@ app.get("/", (req, res) => {
 // page for new URLs
 app.get("/urls/new", (req, res) => {
   for (let user in users) {
-    if (users[req.cookies["user_id"]] === users[user]) {
+    if (users[req.session.user_id] === users[user]) {
       let templateVars = {
-        users: users[req.cookies["user_id"]]
+        users: users[req.session.user_id]
       };
       res.render("urls_new", templateVars);
       return;
@@ -89,8 +64,8 @@ app.get("/urls/new", (req, res) => {
 // page for the URL list
 app.get("/urls", (req, res) => {
   let templateVars = {
-    urls: urlsForUser(req.cookies.user_id),
-    users: users[req.cookies["user_id"]]
+    urls: urlsForUser(req.session.user_id, urlDatabase),
+    users: users[req.session.user_id]
   };
   res.render("urls_index", templateVars);
 });
@@ -100,7 +75,7 @@ app.post("/urls", (req, res) => {
   const string = random();
   urlDatabase[string] = {
     longURL: req.body.longURL,
-    userID: req.cookies.user_id
+    userID: req.session.user_id
   };
   res.redirect("http://localhost:8080/urls/" + String(string));
 });
@@ -108,7 +83,7 @@ app.post("/urls", (req, res) => {
 // the individual shortened URL pages
 app.get("/urls/:id", (req, res) => {
   let templateVars = {
-    users: users[req.cookies["user_id"]],
+    users: users[req.session.user_id],
     shortURL: req.params.id,
     longURL: urlDatabase[req.params.id].longURL
   };
@@ -134,8 +109,8 @@ app.get("/u/:shortURL", (req, res) => {
 // deleting old URLs
 app.post("/urls/:id/delete", (req, res) => {
   if (
-    users[req.cookies.user_id] &&
-    urlDatabase[req.params.id].userID === req.cookies.user_id
+    users[req.session.user_id] &&
+    urlDatabase[req.param.id].userID === req.session.user_id
   ) {
     delete urlDatabase[req.params.id];
     res.redirect("/urls");
@@ -146,12 +121,12 @@ app.post("/urls/:id/delete", (req, res) => {
 
 // Registering for new accounts
 app.get("/register", (req, res) => {
-  res.render("register", { users: users[req.cookies["user_id"]] });
+  res.render("register", { users: users[req.session.user_id] });
 });
 
 // logging in and out
 app.get("/login", (req, res) => {
-  res.render("login", { users: users[req.cookies["user_id"]] });
+  res.render("login", { users: users[req.session.user_id] });
 });
 
 // registering as a new user
@@ -167,20 +142,20 @@ app.post("/register", (req, res) => {
   if (!userVars.email || !userVars.password) {
     res.status(400).send("Email and password fields are empty");
     //if email provided is existing render 400 status
-  } else if (existingEmail(req.body.email)) {
+  } else if (getUserByEmail(req.body.email, users)) {
     res
       .status(400)
       .send("Existing user, please register with a different email");
   } else {
     users[userID] = userVars;
-    res.cookie("user_id", userID);
+    req.session.user_id = userID;
     res.redirect("/urls");
   }
 });
 
 // logging an user out
 app.post("/logout", (req, res) => {
-  res.clearCookie("user_id");
+  req.session = null;
   res.redirect("/urls");
 });
 
@@ -189,14 +164,14 @@ app.post("/login", (req, res) => {
   let email = req.body.email;
   let password = req.body.password;
   //if no email found in the database render 403 status
-  if (!existingEmail(req.body.email)) {
+  if (!getUserByEmail(req.body.email, users)) {
     res.status(403).send("Email address cannot be found");
     //if email provided is existing render 400 status
   } else { 
     for (let item in users) {
       user = users[item];
       if (req.body.email === user.email && bcrypt.compareSync(req.body.password, user.password)) {
-        res.cookie("user_id", user.id);
+        req.session.user_id = user.id;
         res.redirect("/urls");
         return;
       }
