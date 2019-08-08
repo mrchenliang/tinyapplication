@@ -9,14 +9,18 @@ const getUserByEmail = function(email, database) {
 };
 
 // random generator
-function random() {
-  var result = "";
-  var characters =
+function random(database) {
+  let result = "";
+  const characters =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  for (var i = 0; i < 6; i++) {
+  for (let i = 0; i < 6; i++) {
     result += characters.charAt(Math.floor(Math.random() * characters.length));
   }
-  return result;
+  if (!database[result]) {
+    return result;
+  } else {
+    random(database);
+  }
 }
 
 // filtering URLs based on userID

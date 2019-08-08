@@ -2,9 +2,9 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
-const sessionession = require('cookie-session');
-const bcrypt = require('bcrypt');
-const {getUserByEmail, urlsForUser, random} = require("./helpers");
+const sessionession = require("cookie-session");
+const bcrypt = require("bcrypt");
+const { getUserByEmail, urlsForUser, random } = require("./helpers");
 
 const urlDatabase = {
   sgq3y6: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
@@ -34,31 +34,36 @@ const users = {
 // parsing the information coming from the client
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
-app.use(sessionession({
-  name: 'session',
-  keys: ["ilovelisa"],
+app.use(
+  sessionession({
+    name: "session",
+    keys: ["ilovelisa"],
 
-  // Cookie Options
-  maxAge: 24 * 60 * 60 * 1000 // 24 hours
-}))
+    // Cookie Options
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  })
+);
 
 // homepage
 app.get("/", (req, res) => {
-  res.redirect("/urls/new");
+  if (!users[req.session.user_id]) {
+    let templateVars = { users: users[req.session.user_id] };
+    res.redirect("/login");
+    return;
+  } else {
+    res.redirect("/urls");
+  }
 });
 
 // page for new URLs
 app.get("/urls/new", (req, res) => {
-  for (let user in users) {
-    if (users[req.session.user_id] === users[user]) {
-      let templateVars = {
-        users: users[req.session.user_id]
-      };
-      res.render("urls_new", templateVars);
-      return;
-    }
+  if (users[req.session.user_id]) {
+    let templateVars = { users: users[req.session.user_id] };
+    res.render("urls_new", templateVars);
+    return;
+  } else {
+    res.redirect("/login");
   }
-  res.redirect("/login");
 });
 
 // page for the URL list
@@ -72,7 +77,7 @@ app.get("/urls", (req, res) => {
 
 // page for URLs updating and posting
 app.post("/urls", (req, res) => {
-  const string = random();
+  const string = random(urlDatabase);
   urlDatabase[string] = {
     longURL: req.body.longURL,
     userID: req.session.user_id
@@ -131,12 +136,12 @@ app.get("/login", (req, res) => {
 
 // registering as a new user
 app.post("/register", (req, res) => {
-  const userID = random();
-  const hashedPassword = bcrypt.hashSync(req.body.password, 10)
+  const userID = random(users);
+  const hashedPassword = bcrypt.hashSync(req.body.password, 10);
   let userVars = {
     id: userID,
     email: req.body.email,
-    password: hashedPassword,
+    password: hashedPassword
   };
   //if no email or password provided render 400 status
   if (!userVars.email || !userVars.password) {
@@ -167,10 +172,13 @@ app.post("/login", (req, res) => {
   if (!getUserByEmail(req.body.email, users)) {
     res.status(403).send("Email address cannot be found");
     //if email provided is existing render 400 status
-  } else { 
+  } else {
     for (let item in users) {
       user = users[item];
-      if (req.body.email === user.email && bcrypt.compareSync(req.body.password, user.password)) {
+      if (
+        req.body.email === user.email &&
+        bcrypt.compareSync(req.body.password, user.password)
+      ) {
         req.session.user_id = user.id;
         res.redirect("/urls");
         return;
