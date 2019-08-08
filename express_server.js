@@ -38,7 +38,7 @@ const users = {
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 app.use(methodOverride("_method"));
-app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')))
 app.use(
   sessionession({
     name: "session",
@@ -48,6 +48,11 @@ app.use(
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
   })
 );
+
+exports.index = function(req, res) {
+  // send moment to your ejs
+  res.render('index', { moment: moment });
+}
 
 // ............................GET...........................//
 

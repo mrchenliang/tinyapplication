@@ -41,7 +41,7 @@
             <td><%= urls[url].longURL %></td>
             <td>Total Visits</td>
             <td>Unique Visits</td>
-            <td><%= Date(Date.now()).toString() %></td>
+            <td><%=new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')%></td>
             <td>
               <a href="/urls/<%= url %>">
                 <button type="submit" class="btn btn-outline-primary">
