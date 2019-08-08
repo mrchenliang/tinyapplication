@@ -6,6 +6,8 @@ const bcrypt = require("bcrypt");
 const { getUserByEmail, urlsForUser, random } = require("./helpers");
 const methodOverride = require("method-override");
 const app = express();
+const favicon = require('serve-favicon');
+const path = require('path');
 
 const urlDatabase = {
   sgq3y6: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
@@ -36,6 +38,7 @@ const users = {
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 app.use(methodOverride("_method"));
+app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(
   sessionession({
     name: "session",
@@ -154,6 +157,10 @@ app.get("/register", (req, res) => {
   } else {
     res.render("register", { users: users[req.session.user_id] });
   }
+});
+
+app.get("/urls.json", (req, res) => {
+  res.json(urlsForUser(req.session.user_id, urlDatabase));
 });
 
 // ............................POST...........................//
