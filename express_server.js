@@ -10,13 +10,13 @@ const favicon = require('serve-favicon');
 const path = require('path');
 
 const urlDatabase = {
-  sgq3y6: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
-  i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" },
-  asfdx8: { longURL: "https://www.google.ca", userID: "test12" },
-  csdsf2: { longURL: "https://www.youtube.ca", userID: "test12" }
+  sgq3y6: { longURL: "https://www.tsn.ca", userID: "aJ48lW", counter: 0, },
+  i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW", counter: 0, },
+  asfdx8: { longURL: "https://www.google.ca", userID: "test12", counter: 0,  },
+  csdsf2: { longURL: "https://www.youtube.ca", userID: "test12", counter: 0,  }
 };
 
-const users = {
+const users = { 
   userRandomID: {
     id: "userRandomID",
     email: "user@example.com",
@@ -75,7 +75,7 @@ app.get("/urls", (req, res) => {
   else {
     let templateVars = {
       urls: urlsForUser(req.session.user_id, urlDatabase),
-      users: users[req.session.user_id]
+      users: users[req.session.user_id],
     };
     res.render("urls_index", templateVars);
   }
@@ -115,6 +115,7 @@ app.get("/urls/:id", (req, res) => {
           users: users[req.session.user_id],
           shortURL: req.params.id,
           longURL: urlDatabase[req.params.id].longURL,
+          counter: urlDatabase[req.params.id].counter,
         };
         res.render("urls_show", templateVars);
       }
@@ -132,6 +133,7 @@ app.get("/u/:id", (req, res) => {
   if (!urlDatabase[req.params.id]) {
     res.status(404).send("Error: 404 URL Not found. <a href=\"/\"> Go Back </a>");
   } else {
+    urlDatabase[req.params.id].counter ++;
     let longURL = urlDatabase[req.params.id].longURL;
     res.redirect(longURL);
   }
@@ -174,7 +176,8 @@ app.post("/urls", (req, res) => {
     const string = random(urlDatabase);
     urlDatabase[string] = {
       longURL: req.body.longURL,
-      userID: req.session.user_id
+      userID: req.session.user_id,
+      counter: 0,
     };
     res.redirect("http://localhost:8080/urls/" + String(string));
   }

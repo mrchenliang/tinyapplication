@@ -39,7 +39,7 @@
               <strong><a href="/u/<%= url %>"><%= url %></a></strong>
             </td>
             <td><%= urls[url].longURL %></td>
-            <td>Total Visits</td>
+            <td><%= urls[url].counter %></td>
             <td>Unique Visits</td>
             <td><%=new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')%></td>
             <td>
