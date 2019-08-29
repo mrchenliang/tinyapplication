@@ -44,7 +44,6 @@ function urlsForUser(database, id) {
 function existingVisitor(database, id, visitorID) {
   let visits = database[id].visits;
   for (const visit of visits) {
-    console.log(visit.visitorId);
     if (visit.visitorId === visitorID) {
       return true;
     }

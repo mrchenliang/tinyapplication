@@ -135,7 +135,8 @@ app.get("/urls/:id", (req, res) => {
           longURL: urlDatabase[req.params.id].longURL,
           createdAt: urlDatabase[req.params.id].createdAt,
           totalCounter: urlDatabase[req.params.id].totalCounter,
-          uniqueCounter: urlDatabase[req.params.id].uniqueCounter
+          uniqueCounter: urlDatabase[req.params.id].uniqueCounter,
+          visits: urlDatabase[req.params.id].visits,
         };
         res.render("urls_show", templateVars);
       }
@@ -227,7 +228,6 @@ app.post("/urls", (req, res) => {
       uniqueCounter: 0,
       visits: []
     };
-    console.log(urlDatabase[string]);
     res.redirect(`/urls/${String(string)}`);
   }
 });
