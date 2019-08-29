@@ -82,8 +82,7 @@ describe("urlsForUser", function() {
   });
   it("should return undefined with invalid email", function() {
     const user = getUserByEmail(urlDatabase, "sadifs");
-    const expectedOutput = undefined;
-    assert.equal(expectedOutput, undefined);
+    assert.equal(user, undefined);
   });
 });
 

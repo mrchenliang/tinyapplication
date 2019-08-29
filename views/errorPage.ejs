@@ -11,10 +11,12 @@
   </head>
 
   <body>
+    <% include partials/_header %>
     <main style="margin: 1em;">
       <h1><%= statusCode %></h1>
       <h2><%= description %></h2>
       <p><%= message %></p>
+      <% include partials/_footer %>
     </main>
       <!-- Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>

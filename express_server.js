@@ -2,7 +2,7 @@ const express = require("express");
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const sessionession = require("cookie-session");
-const cookieParser = require('cookie-parser');
+const cookieParser = require("cookie-parser");
 const bcrypt = require("bcrypt");
 const {
   getUserByEmail,
@@ -23,12 +23,11 @@ const urlDatabase = {
   asfdx8: {
     longURL: "https://www.google.ca",
     userID: "test12",
-    createdAt: 'August 29th 2019, 6:39:50 am',
+    createdAt: "August 29th 2019, 6:39:50 am",
     totalCounter: 0,
     uniqueCounter: 0,
     visits: []
-  },
-
+  }
 };
 // contains users database
 const users = {
@@ -72,9 +71,8 @@ app.get("/", (req, res) => {
   if (!users[req.session.user_id]) {
     res.redirect("/login");
     return;
-  }
-  // if logged in, redirect to urls
-  else {
+  } else {
+    // if logged in, redirect to urls
     res.redirect("/urls");
   }
 });
@@ -86,12 +84,11 @@ app.get("/urls", (req, res) => {
     res
       .status(404)
       .send('Error: 404 Page not found. <a href="/"> Go Back </a>');
-  }
-  // if logged in, render to URL page
-  else {
+  } else {
+    // if logged in, render to URL page
     let templateVars = {
       urls: urlsForUser(urlDatabase, req.session.user_id),
-      users: users[req.session.user_id],
+      users: users[req.session.user_id]
     };
     res.render("urls_index", templateVars);
   }
@@ -102,9 +99,8 @@ app.get("/urls/new", (req, res) => {
   // if not logged in, redirect to login page
   if (!users[req.session.user_id]) {
     res.redirect("/login");
-  }
-  // if logged in, render to new URL page
-  else {
+  } else {
+    // if logged in, render to new URL page
     let templateVars = { users: users[req.session.user_id] };
     res.render("urls_new", templateVars);
     return;
@@ -136,14 +132,13 @@ app.get("/urls/:id", (req, res) => {
           createdAt: urlDatabase[req.params.id].createdAt,
           totalCounter: urlDatabase[req.params.id].totalCounter,
           uniqueCounter: urlDatabase[req.params.id].uniqueCounter,
-          visits: urlDatabase[req.params.id].visits,
+          visits: urlDatabase[req.params.id].visits
         };
         res.render("urls_show", templateVars);
       }
     }
-  }
-  //it not user's URL, display error
-  else {
+  } else {
+    //it not user's URL, display error
     res
       .status(401)
       .send('Error: 401 Cannot access URL link. <a href="/"> Go Back </a>');
@@ -186,9 +181,8 @@ app.get("/login", (req, res) => {
   // if not logged in, display error
   if (users[req.session.user_id]) {
     res.redirect("urls");
-  }
-  // logging in user
-  else {
+  } else {
+    // logging in user
     res.render("login", { users: users[req.session.user_id] });
   }
 });
@@ -241,17 +235,15 @@ app.put("/urls/:id", (req, res) => {
       .send(
         'Error: 401 Unauthorized user not found. <a href="/"> Go Back </a>'
       );
-  }
-  //editting and changing the shortened URL page
-  else if (
+  } else if (
+    //editting and changing the shortened URL page
     users[req.session.user_id] &&
     urlDatabase[req.params.id].userID === req.session.user_id
   ) {
     urlDatabase[req.params.id].longURL = req.body.longURL;
     res.redirect(`/urls`);
-  }
-  //trying to delete someone else's link will result in error
-  else {
+  } else {
+    //trying to delete someone else's link will result in error
     res
       .status(401)
       .send(
@@ -269,17 +261,15 @@ app.delete("/urls/:id/delete", (req, res) => {
       .send(
         'Error: 401 Unauthorized user not found. <a href="/"> Go Back </a>'
       );
-  }
+  } else if (
   // deleting old URLs
-  else if (
     users[req.session.user_id] &&
     urlDatabase[req.params.id].userID === req.session.user_id
   ) {
     delete urlDatabase[req.params.id];
     res.redirect("/urls");
-  }
-  //trying to delete someone else's link will result in error
-  else {
+  } else {
+    //trying to delete someone else's link will result in error
     res
       .status(401)
       .send(
@@ -299,11 +289,10 @@ app.post("/login", (req, res) => {
       .send(
         'Error: 403 Email address cannot be found. <a href="/"> Go Back </a>'
       );
-  }
-  // logging in an user
-  else {
+  } else {
+    // logging in an user
     for (let item in users) {
-      user = users[item];
+      let user = users[item];
       if (email === user.email && bcrypt.compareSync(password, user.password)) {
         req.session.user_id = user.id;
         res.redirect("/urls");
@@ -324,9 +313,8 @@ app.post("/register", (req, res) => {
   // if not logged in, display error
   if (users[req.session.user_id]) {
     res.redirect("/urls");
-  }
-  // registering as a new user
-  else {
+  } else {
+    // registering as a new user
     const userID = random(users);
     const hashedPassword = bcrypt.hashSync(req.body.password, 10);
     let userVars = {
@@ -341,9 +329,8 @@ app.post("/register", (req, res) => {
         .send(
           'Error: 400 Email and password fields are empty. <a href="/"> Go Back </a>'
         );
-    }
-    //if email provided is existing render 409 status
-    else if (getUserByEmail(users, req.body.email)) {
+    } else if (getUserByEmail(users, req.body.email)) {
+      //if email provided is existing render 409 status
       res
         .status(400)
         .send(

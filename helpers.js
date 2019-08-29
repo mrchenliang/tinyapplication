@@ -9,7 +9,7 @@ const getUserByEmail = function(database, email) {
 };
 
 // random generator
-function random(database) {
+const random = function(database) {
   let result = "";
   const characters =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -21,27 +21,27 @@ function random(database) {
   } else {
     random(database);
   }
-}
+};
 
 // filtering URLs based on userID
-function urlsForUser(database, id) {
+const urlsForUser = function(database, id) {
   let shortURL = {};
   for (let key in database) {
     if (id === database[key].userID) {
-      shortURL[key] = { 
-        longURL: database[key].longURL, 
-        userID: id, 
+      shortURL[key] = {
+        longURL: database[key].longURL,
+        userID: id,
         createdAt: database[key].createdAt,
-        totalCounter: database[key].totalCounter, 
+        totalCounter: database[key].totalCounter,
         uniqueCounter: database[key].uniqueCounter,
-        visits:database[key].visits,
+        visits: database[key].visits
       };
     }
   }
   return shortURL;
-}
+};
 
-function existingVisitor(database, id, visitorID) {
+const existingVisitor = function(database, id, visitorID) {
   let visits = database[id].visits;
   for (const visit of visits) {
     if (visit.visitorId === visitorID) {
