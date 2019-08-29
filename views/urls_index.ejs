@@ -39,13 +39,13 @@
               <strong><a href="/u/<%= url %>"><%= url %></a></strong>
             </td>
             <td><%= urls[url].longURL %></td>
-            <td><%= urls[url].counter %></td>
-            <td>Unique Visits</td>
+            <td><%= urls[url].totalCounter %></td>
+            <td><%= urls[url].uniqueCounter %></td>
             <td><%=new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')%></td>
             <td>
               <a href="/urls/<%= url %>">
                 <button type="submit" class="btn btn-outline-primary">
-                  Edit
+                  Edit 🛠
                 </button>
               </a>
             </td>

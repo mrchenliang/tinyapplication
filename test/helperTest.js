@@ -36,13 +36,13 @@ describe("random", function() {
 
 describe("getUserByEmail", function() {
   it("should return a user with valid email", function() {
-    const user = getUserByEmail("user@example.com", users);
+    const user = getUserByEmail(users, "user@example.com");
     const expectedOutput = "userRandomID";
     assert.equal(expectedOutput, user);
   });
 
   it("should return undefined with invalid email", function() {
-    const user = getUserByEmail("c@example.com", users);
+    const user = getUserByEmail(users, "c@example.com");
     const expectedOutput = undefined;
     assert.equal(expectedOutput, user);
   });
@@ -58,7 +58,7 @@ describe("urlsForUser", function() {
     assert.deepStrictEqual(user, expectedOutput);
   });
   it("should return undefined with invalid email", function() {
-    const user = getUserByEmail("sadifs", urlDatabase);
+    const user = getUserByEmail(urlDatabase, "sadifs");
     const expectedOutput = undefined;
     assert.equal(expectedOutput, undefined);
   });
