@@ -81,9 +81,8 @@ app.get("/", (req, res) => {
 app.get("/urls", (req, res) => {
   // if not logged in, display error
   if (!users[req.session.user_id]) {
-    res
-      .status(404)
-      .send('Error: 404 Page not found. <a href="/"> Go Back </a>');
+    res.status = 404;
+    res.render("errorPage", { status: 404, description:"Not Found", message: "You are not logged in." });
   } else {
     // if logged in, render to URL page
     let templateVars = {
@@ -111,12 +110,12 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:id", (req, res) => {
   // if not logged in, display error
   if (!users[req.session.user_id]) {
-    res
-      .status(409)
-      .send('Error: 409 User not found. <a href="/"> Go Back </a>');
+    res.status = 404;
+    res.render("errorPage", { status: 404, description:"Not Found", message: "You are not logged in." });
+    } else if (!urlDatabase[req.params.id]) {
     // if URL doesn't exist, display error
-  } else if (!urlDatabase[req.params.id]) {
-    res.status(404).send('Error: 404 Not found. <a href="/"> Go Back </a>');
+    res.status = 404;
+    res.render("errorPage", { status: 404, description:"Not Found", message: "URL does not exist." });
   } else if (
     users[req.session.user_id] &&
     urlDatabase[req.params.id] &&
@@ -138,10 +137,9 @@ app.get("/urls/:id", (req, res) => {
       }
     }
   } else {
-    //it not user's URL, display error
-    res
-      .status(401)
-      .send('Error: 401 Cannot access URL link. <a href="/"> Go Back </a>');
+    //it is not user's URL, display error
+    res.status = 401;
+    res.render("errorPage", { status: 401, description:"No Access", message: "Cannot Access URL Link." });
   }
 });
 
@@ -149,7 +147,8 @@ app.get("/urls/:id", (req, res) => {
 app.get("/u/:id", (req, res) => {
   // if not logged in, display error
   if (!urlDatabase[req.params.id]) {
-    res.status(404).send('Error: 404 URL Not found. <a href="/"> Go Back </a>');
+    res.status = 404;
+    res.render("errorPage", { status: 404, description:"Not Found", message: "You are not logged in." });
   } else {
     urlDatabase[req.params.id].totalCounter++;
     const longURL = urlDatabase[req.params.id].longURL;
@@ -178,7 +177,7 @@ app.get("/u/:id", (req, res) => {
 
 // Logging in
 app.get("/login", (req, res) => {
-  // if not logged in, display error
+  // if not logged in, redirect to urls which will direct user to login
   if (users[req.session.user_id]) {
     res.redirect("urls");
   } else {
@@ -189,7 +188,7 @@ app.get("/login", (req, res) => {
 
 // Registering for new accounts
 app.get("/register", (req, res) => {
-  // if not logged in, display error
+  // if not logged in, redirect to urls which will direct user to login
   if (users[req.session.user_id]) {
     res.redirect("urls");
   } else {
@@ -207,11 +206,8 @@ app.get("/urls.json", (req, res) => {
 app.post("/urls", (req, res) => {
   // if not logged in, display error
   if (!users[req.session.user_id]) {
-    res
-      .status(401)
-      .send(
-        'Error: 401 Unauthorized user not found. <a href="/"> Go Back </a>'
-      );
+    res.status = 404;
+    res.render("errorPage", { status: 404, description:"Not Found", message: "You are not logged in." });
   } else {
     const string = random(urlDatabase);
     urlDatabase[string] = {
@@ -228,13 +224,10 @@ app.post("/urls", (req, res) => {
 
 // editting and changing shortened URL page
 app.put("/urls/:id", (req, res) => {
-  // if not logged in, display error
+  // if not logged in, cannot edit/change url, dispaly error
   if (!users[req.session.user_id]) {
-    res
-      .status(401)
-      .send(
-        'Error: 401 Unauthorized user not found. <a href="/"> Go Back </a>'
-      );
+    res.status = 401;
+    res.render("errorPage", { status: 401, description:"Not Found", message: "You Do Not Have Access." });
   } else if (
     //editting and changing the shortened URL page
     users[req.session.user_id] &&
@@ -244,23 +237,17 @@ app.put("/urls/:id", (req, res) => {
     res.redirect(`/urls`);
   } else {
     //trying to delete someone else's link will result in error
-    res
-      .status(401)
-      .send(
-        'Error: 401 Unauthorized Cannot delete URL link. <a href="/">Go Back </a>'
-      );
+    res.status = 401;
+    res.render("errorPage", { status: 401, description:"Not Found", message: "You Do Not Have Access." });
   }
 });
 
 // deleting old URLs
 app.delete("/urls/:id/delete", (req, res) => {
-  // if not logged in, display error
+  // if not logged in, cannot edit/change url, dispaly error
   if (!users[req.session.user_id]) {
-    res
-      .status(401)
-      .send(
-        'Error: 401 Unauthorized user not found. <a href="/"> Go Back </a>'
-      );
+    res.status = 401;
+    res.render("errorPage", { status: 401, description:"Not Found", message: "You Do Not Have Access." });
   } else if (
   // deleting old URLs
     users[req.session.user_id] &&
@@ -270,12 +257,8 @@ app.delete("/urls/:id/delete", (req, res) => {
     res.redirect("/urls");
   } else {
     //trying to delete someone else's link will result in error
-    res
-      .status(401)
-      .send(
-        "Error: 401 Unauthorized Cannot delete URL link. <a href=" /
-          "> Go Back </a>"
-      );
+    res.status = 401;
+    res.render("errorPage", { status: 401, description:"Not Found", message: "You Do Not Have Access." });
   }
 });
 
@@ -284,11 +267,8 @@ app.post("/login", (req, res) => {
   const { email, password } = req.body;
   //if no email found in the database render 403 status
   if (!getUserByEmail(users, req.body.email)) {
-    res
-      .status(403)
-      .send(
-        'Error: 403 Email address cannot be found. <a href="/"> Go Back </a>'
-      );
+    res.status = 401;
+    res.render("errorPage", { status: 401, description:"Not Found", message: "Your Email Cannot Be Found." });
   } else {
     // logging in an user
     for (let item in users) {
@@ -299,18 +279,15 @@ app.post("/login", (req, res) => {
         return;
       }
     }
-    //if email and password don't provided is existing render 400 status
-    res
-      .status(401)
-      .send(
-        'Error: 401 Unauthorized You have entered the incorrect password. <a href="/"> Go Back </a>'
-      );
+    //if email and password don't provided is existing render 404 status
+    res.status = 401;
+    res.render("errorPage", { status: 401, description:"Not Found", message: "You Have Entered the Incorrect Password." });
   }
 });
 
 // registering as a new user
 app.post("/register", (req, res) => {
-  // if not logged in, display error
+  // if not logged in, redirect to urls which will direct user to login
   if (users[req.session.user_id]) {
     res.redirect("/urls");
   } else {
@@ -324,18 +301,12 @@ app.post("/register", (req, res) => {
     };
     //if no email or password provided render 400 status
     if (!userVars.email || !userVars.password) {
-      res
-        .status(400)
-        .send(
-          'Error: 400 Email and password fields are empty. <a href="/"> Go Back </a>'
-        );
+      res.status = 400;
+      res.render("errorPage", { status: 400, description:"Not Found", message: "Your Email and Password Fields are Empty." });
     } else if (getUserByEmail(users, req.body.email)) {
       //if email provided is existing render 409 status
-      res
-        .status(400)
-        .send(
-          'Error: 409 Existing user, please register with a different email. <a href="/"> Go Back </a>'
-        );
+      res.status = 409;
+      res.render("errorPage", { status: 409, description:"Not Found", message: "Existing User, Please Register Using a Different Email." });
     } else {
       users[userID] = userVars;
       req.session.user_id = userID;
