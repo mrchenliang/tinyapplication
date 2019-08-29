@@ -28,7 +28,14 @@ function urlsForUser(database, id) {
   let shortURL = {};
   for (let key in database) {
     if (id === database[key].userID) {
-      shortURL[key] = { longURL: database[key].longURL, userID: id, totalCounter: database[key].totalCounter, uniqueCounter: database[key].uniqueCounter};
+      shortURL[key] = { 
+        longURL: database[key].longURL, 
+        userID: id, 
+        createdAt: database[key].createdAt,
+        totalCounter: database[key].totalCounter, 
+        uniqueCounter: database[key].uniqueCounter,
+        visits:database[key].visits,
+      };
     }
   }
   return shortURL;

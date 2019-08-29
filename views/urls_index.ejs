@@ -41,7 +41,7 @@
             <td><%= urls[url].longURL %></td>
             <td><%= urls[url].totalCounter %></td>
             <td><%= urls[url].uniqueCounter %></td>
-            <td><%=new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')%></td>
+            <td><%= urls[url].createdAt %></td>
             <td>
               <a href="/urls/<%= url %>">
                 <button type="submit" class="btn btn-outline-primary">

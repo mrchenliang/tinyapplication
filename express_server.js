@@ -19,7 +19,7 @@ const moment = require("moment");
 // contains url database
 const urlDatabase = {
   //Empty at start of application
-  /*
+
   asfdx8: {
     longURL: "https://www.google.ca",
     userID: "test12",
@@ -28,19 +28,16 @@ const urlDatabase = {
     uniqueCounter: 0,
     visits: []
   },
-  */
+
 };
 // contains users database
 const users = {
   //Empty at start of application
-  /*
-  Example user id pair:
   test12: {
     id: "test12",
     email: "c@c.com",
     password: bcrypt.hashSync("a", 10)
   }
-  */
 };
 // contains temp visitors database
 let visitors = {
@@ -94,7 +91,7 @@ app.get("/urls", (req, res) => {
   else {
     let templateVars = {
       urls: urlsForUser(urlDatabase, req.session.user_id),
-      users: users[req.session.user_id]
+      users: users[req.session.user_id],
     };
     res.render("urls_index", templateVars);
   }
@@ -136,6 +133,7 @@ app.get("/urls/:id", (req, res) => {
           users: users[req.session.user_id],
           shortURL: req.params.id,
           longURL: urlDatabase[req.params.id].longURL,
+          createdAt: urlDatabase[req.params.id].createdAt,
           totalCounter: urlDatabase[req.params.id].totalCounter,
           uniqueCounter: urlDatabase[req.params.id].uniqueCounter
         };
