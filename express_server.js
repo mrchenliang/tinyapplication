@@ -1,5 +1,5 @@
 const express = require("express");
-const PORT = 8080; // default port 8080
+const PORT = 80; // default port 8080
 const bodyParser = require("body-parser");
 const sessionession = require("cookie-session");
 const cookieParser = require("cookie-parser");
@@ -378,5 +378,5 @@ app.delete("/logout", (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`TinyApp is listening on port ${PORT}!`);
+  console.log(`Tiny URL Application is listening on port ${PORT}!`);
 });
