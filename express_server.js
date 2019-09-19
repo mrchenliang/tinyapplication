@@ -1,5 +1,5 @@
 const express = require("express");
-const PORT = 80; // default port 8080
+const PORT = 3000; // default port 8080
 const bodyParser = require("body-parser");
 const sessionession = require("cookie-session");
 const cookieParser = require("cookie-parser");
