@@ -377,6 +377,6 @@ app.delete("/logout", (req, res) => {
   res.redirect("/");
 });
 
-app.listen(PORT, () => {
+app.listen((process.env.PORT || PORT), () => {
   console.log(`Tiny URL Application is listening on port ${PORT}!`);
 });
