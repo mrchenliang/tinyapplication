@@ -6,9 +6,7 @@
   "scripts": {
     "local": "./node_modules/.bin/nodemon -L express_server.js",
     "start": "node express_server.js",
-    "test": "./node_modules/mocha/bin/mocha",
-    "lambda-serve ": "netlify-lambda serve functions",
-    "lambda-build ": "netlify-lambda build functions"
+    "test": "./node_modules/mocha/bin/mocha"
   },
   "repository": {
     "type": "git",
